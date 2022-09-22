@@ -1,0 +1,177 @@
+Source: kservice
+Section: libs
+Priority: optional
+Maintainer: Debian Qt/KDE Maintainers <debian-qt-kde@lists.debian.org>
+Uploaders: Aurélien COUDERC <coucouf@debian.org>,
+           Norbert Preining <norbert@preining.info>,
+Build-Depends: bison (>= 3.0~),
+               cmake (>= 3.16~),
+               debhelper-compat (= 13),
+               doxygen,
+               extra-cmake-modules (>= 5.90.0~),
+               flex,
+               libkf5config-dev (>= 5.90.0~),
+               libkf5coreaddons-dev (>= 5.90.0~),
+               libkf5crash-dev (>= 5.85.0~),
+               libkf5dbusaddons-dev (>= 5.90.0~),
+               libkf5doctools-dev (>= 5.90.0~),
+               libkf5i18n-dev (>= 5.90.0~),
+               libqt5sql5-sqlite,
+               pkg-kde-tools (>= 0.15.15ubuntu1~),
+               qtbase5-dev (>= 5.15.2~),
+               qttools5-dev,
+               qttools5-dev-tools (>= 5.4),
+Standards-Version: 4.6.0
+Homepage: https://invent.kde.org/frameworks/kservice
+Vcs-Browser: https://salsa.debian.org/qt-kde-team/kde/kservice
+Vcs-Git: https://salsa.debian.org/qt-kde-team/kde/kservice.git
+Rules-Requires-Root: no
+
+Package: libkf5service-bin
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: baloo-kf5 (<< 5.42),
+        kded5 (<< 5.54),
+        kdesignerplugin (<< 5.42),
+        kinit (<< 5.54),
+        kio (<< 5.54),
+        kross (<< 5.42),
+        ktexteditor-katepart (<< 5.42),
+        libkf5declarative5 (<< 5.42),
+        libkf5emoticons-bin (<< 5.42),
+        libkf5emoticons5 (<< 5.54),
+        libkf5kcmutils5 (<< 5.54),
+        libkf5kdelibs4support5 (<< 5.54),
+        libkf5kdelibs4support5-bin (<< 5.42),
+        libkf5khtml-bin (<< 5.54),
+        libkf5khtml5 (<< 5.54),
+        libkf5kiocore5 (<< 5.54),
+        libkf5kiofilewidgets5 (<< 5.42),
+        libkf5kiogui5 (<< 5.42),
+        libkf5kiowidgets5 (<< 5.54),
+        libkf5krossui5 (<< 5.42),
+        libkf5mediaplayer5 (<< 5.42),
+        libkf5newstuff5 (<< 5.54),
+        libkf5notifyconfig5 (<< 5.42),
+        libkf5parts-plugins (<< 5.42),
+        libkf5parts5 (<< 5.54),
+        libkf5people5 (<< 5.54),
+        libkf5peoplewidgets5 (<< 5.54),
+        libkf5plasma5 (<< 5.54),
+        libkf5plasmaquick5 (<< 5.54),
+        libkf5runner5 (<< 5.54),
+        libkf5service5 (<= 5.15),
+        libkf5su5 (<< 5.54),
+        libkf5texteditor5 (<< 5.42),
+        libkf5textwidgets5 (<< 5.54),
+        libkf5wallet-bin (<< 5.54),
+        libkf5webkit5 (<< 5.54),
+        libkf5xmlrpcclient5 (<< 5.42),
+        plasma-framework (<< 5.54),
+        qml-module-org-kde-kio (<< 5.54),
+        qml-module-org-kde-runnermodel (<< 5.42),
+Replaces: libkf5service5 (<= 5.15)
+Description: Advanced plugin and service introspection
+ Application framework for file type association
+ and plugin locating.
+ .
+ This package contains kbuildsycoca5.
+
+Package: libkf5service-data
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Advanced plugin and service introspection
+ Application framework for file type association
+ and plugin locating.
+ .
+ This package contains shared data files.
+
+Package: libkf5service-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libkf5config-dev (>= 5.90.0~),
+         libkf5coreaddons-dev (>= 5.90.0~),
+         libkf5dbusaddons-dev (>= 5.90.0~),
+         libkf5i18n-dev (>= 5.90.0~),
+         libkf5service5 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends},
+Recommends: libkf5service-doc (= ${source:Version})
+Breaks: kded5-dev (<< 5.54),
+        kio-dev (<< 5.28),
+        libkf5emoticons-dev (<< 5.54),
+        libkf5kcmutils-dev (<< 5.54),
+        libkf5kio-dev (<< 5.54),
+        libkf5plasma-dev (<< 5.54),
+        libkf5service5 (<< 5.12.0~),
+        libkf5textwidgets-dev (<< 5.54),
+        plasma-framework-dev (<< 5.28),
+Replaces: libkf5service5 (<< 5.12.0~)
+Description: development files for kservice
+ Application framework for file type association
+ and plugin locating.
+ .
+ Contains development files for kservice.
+
+Package: libkf5service-doc
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: Advanced plugin and service introspection (documentation)
+ Application framework for file type association
+ and plugin locating.
+ .
+ This package contains the qch documentation files.
+Section: doc
+
+Package: libkf5service5
+Architecture: any
+Multi-Arch: same
+Depends: libkf5service-data (= ${source:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends},
+Recommends: libkf5service-bin (= ${binary:Version})
+Description: Advanced plugin and service introspection
+ Application framework for file type association
+ and plugin locating.
+Breaks: baloo-kf5 (<< 5.42),
+        kded5 (<< 5.54),
+        kdesignerplugin (<< 5.42),
+        kinit (<< 5.54),
+        kio (<< 5.54),
+        kross (<< 5.42),
+        ktexteditor-katepart (<< 5.42),
+        libkf5declarative5 (<< 5.42),
+        libkf5emoticons-bin (<< 5.42),
+        libkf5emoticons5 (<< 5.54),
+        libkf5kcmutils5 (<< 5.54),
+        libkf5kdelibs4support5 (<< 5.54),
+        libkf5kdelibs4support5-bin (<< 5.42),
+        libkf5khtml-bin (<< 5.54),
+        libkf5khtml5 (<< 5.54),
+        libkf5kiocore5 (<< 5.54),
+        libkf5kiofilewidgets5 (<< 5.42),
+        libkf5kiogui5 (<< 5.42),
+        libkf5kiowidgets5 (<< 5.54),
+        libkf5krossui5 (<< 5.42),
+        libkf5mediaplayer5 (<< 5.42),
+        libkf5newstuff5 (<< 5.54),
+        libkf5notifyconfig5 (<< 5.42),
+        libkf5parts-plugins (<< 5.42),
+        libkf5parts5 (<< 5.54),
+        libkf5people5 (<< 5.54),
+        libkf5peoplewidgets5 (<< 5.54),
+        libkf5plasma5 (<< 5.54),
+        libkf5plasmaquick5 (<< 5.54),
+        libkf5runner5 (<< 5.54),
+        libkf5su5 (<< 5.54),
+        libkf5texteditor5 (<< 5.42),
+        libkf5textwidgets5 (<< 5.54),
+        libkf5wallet-bin (<< 5.54),
+        libkf5webkit5 (<< 5.54),
+        libkf5xmlrpcclient5 (<< 5.42),
+        plasma-framework (<< 5.54),
+        qml-module-org-kde-kio (<< 5.54),
+        qml-module-org-kde-runnermodel (<< 5.42),
