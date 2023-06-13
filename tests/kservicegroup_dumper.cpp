@@ -19,8 +19,7 @@ int main(int argc, char *argv[])
     KServiceGroup::Ptr first;
 
     qDebug("Found %d entries", list.count());
-    for (KServiceGroup::List::ConstIterator it = list.constBegin(); it != list.constEnd(); ++it) {
-        KSycocaEntry::Ptr p = (*it);
+    for (const KSycocaEntry::Ptr &p : std::as_const(list)) {
         if (p->isType(KST_KService)) {
             KService::Ptr service(static_cast<KService *>(p.data()));
             qDebug("%s", qPrintable(service->name()));
@@ -39,8 +38,7 @@ int main(int argc, char *argv[])
     if (first) {
         list = first->entries();
         qDebug("Found %d entries", list.count());
-        for (KServiceGroup::List::ConstIterator it = list.constBegin(); it != list.constEnd(); ++it) {
-            KSycocaEntry::Ptr p = (*it);
+        for (const KSycocaEntry::Ptr &p : std::as_const(list)) {
             if (p->isType(KST_KService)) {
                 KService::Ptr service(static_cast<KService *>(p.data()));
                 qDebug("             %s", qPrintable(service->name()));

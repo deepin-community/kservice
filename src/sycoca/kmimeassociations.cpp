@@ -72,13 +72,13 @@ QStringList KMimeAssociations::mimeAppsDirs()
 void KMimeAssociations::parseAllMimeAppsList()
 {
     int basePreference = 1000; // start high :)
-    const QStringList mimeappsFiles = KMimeAssociations::mimeAppsFiles();
-    QListIterator<QString> mimeappsIter(mimeappsFiles);
-    mimeappsIter.toBack();
-    while (mimeappsIter.hasPrevious()) { // global first, then local.
-        const QString mimeappsFile = mimeappsIter.previous();
+    const QStringList files = KMimeAssociations::mimeAppsFiles();
+    // Global first, then local
+    auto it = files.crbegin();
+    auto endIt = files.crend();
+    for (; it != endIt; ++it) {
         // qDebug() << "Parsing" << mimeappsFile;
-        parseMimeAppsList(mimeappsFile, basePreference);
+        parseMimeAppsList(*it, basePreference);
         basePreference += 50;
     }
 }
@@ -161,13 +161,13 @@ void KOfferHash::addServiceOffer(const QString &serviceType, const KServiceOffer
         offers.append(offer);
         offerSet.insert(service);
     } else {
+        const int initPref = offer.preference();
         // qDebug() << service->entryPath() << "already in" << serviceType;
         // This happens when mimeapps.list mentions a service (to make it preferred)
-        // Update initialPreference to qMax(existing offer, new offer)
-        QMutableListIterator<KServiceOffer> sfit(data.offers);
-        while (sfit.hasNext()) {
-            if (sfit.next().service() == service) { // we can compare KService::Ptrs because they are from the memory hash
-                sfit.value().setPreference(qMax(sfit.value().preference(), offer.preference()));
+        // Update initialPreference to std::max(existing offer, new offer)
+        for (KServiceOffer &servOffer : data.offers) {
+            if (servOffer.service() == service) { // we can compare KService::Ptrs because they are from the memory hash
+                servOffer.setPreference(std::max(servOffer.preference(), initPref));
             }
         }
     }
@@ -178,19 +178,21 @@ void KOfferHash::removeServiceOffer(const QString &serviceType, const KService::
     ServiceTypeOffersData &data = m_serviceTypeData[serviceType]; // find or create
     data.removedOffers.insert(service);
     data.offerSet.remove(service);
-    QMutableListIterator<KServiceOffer> sfit(data.offers);
-    while (sfit.hasNext()) {
-        if (sfit.next().service()->storageId() == service->storageId()) {
-            sfit.remove();
-        }
-    }
+
+    const QString id = service->storageId();
+
+    auto &list = data.offers;
+    auto it = std::remove_if(list.begin(), list.end(), [&id](const KServiceOffer &offer) {
+        return offer.service()->storageId() == id;
+    });
+    list.erase(it, list.end());
 }
 
 bool KOfferHash::hasRemovedOffer(const QString &serviceType, const KService::Ptr &service) const
 {
-    QHash<QString, ServiceTypeOffersData>::const_iterator it = m_serviceTypeData.find(serviceType);
-    if (it != m_serviceTypeData.end()) {
-        return (*it).removedOffers.contains(service);
+    auto it = m_serviceTypeData.constFind(serviceType);
+    if (it != m_serviceTypeData.cend()) {
+        return it.value().removedOffers.contains(service);
     }
     return false;
 }

@@ -1,4 +1,4 @@
-# translation of kdelibs4.po to Esperanto
+# translation of kservice5.pot to Esperanto
 # Esperantaj mesaĝoj por "kdelibs"
 # Copyright (C) 1998,2002, 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 #
@@ -15,9 +15,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kdelibs4\n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2021-09-19 00:15+0000\n"
-"PO-Revision-Date: 2012-05-22 12:30+0200\n"
-"Last-Translator: Michael Moroni <michael.moroni@mailoo.org>\n"
+"POT-Creation-Date: 2022-12-22 00:43+0000\n"
+"PO-Revision-Date: 2023-01-05 10:00+0100\n"
+"Last-Translator: Oliver Kellogg <okellogg@users.sourceforge.net>\n"
 "Language-Team: Esperanto <kde-i18n-doc@kde.org>\n"
 "Language: eo\n"
 "MIME-Version: 1.0\n"
@@ -76,13 +76,13 @@ msgid "Waldo Bastian"
 msgstr "Waldo BASTIAN"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:103
-#, fuzzy, kde-format
-#| msgid "Disable checking files (dangerous)"
+#, kde-format
 msgctxt "@info:shell command-line option"
 msgid ""
 "Do not signal applications to update (deprecated, no longer having any "
 "effect)"
-msgstr "Malŝalti dosierkontrolon (riska)"
+msgstr ""
+"Ne signali al aplikaĵoj ĝisdatigi (evitinda, ne plu havanta iun efikon)"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:105
 #, kde-format
@@ -204,12 +204,12 @@ msgstr "Ne povis ruli terminalon"
 msgid "No service implementing %1"
 msgstr ""
 
-#: services/kservice.cpp:1066
+#: services/kservice.cpp:1120
 #, kde-format
 msgid "The provided service is not valid"
 msgstr ""
 
-#: services/kservice.cpp:1070
+#: services/kservice.cpp:1124
 #, kde-format
 msgid "The service '%1' provides no library or the Library key is missing"
 msgstr "La servo '%1' ne provizas bibliotekon aŭ la biblioteka ŝlosilo mankas"

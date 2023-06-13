@@ -17,20 +17,21 @@
 # Serdar SOYTETİR <tulliana@gmail.com>, 2010, 2012.
 # Volkan Gezer <volkangezer@gmail.com>, 2013, 2014.
 # Kaan Ozdincer <kaanozdincer@gmail.com>, 2014.
+# Emir SARI <emir_sari@icloud.com>, 2022, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: kdelibs4\n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2021-09-19 00:15+0000\n"
-"PO-Revision-Date: 2015-09-15 09:20+0000\n"
-"Last-Translator: Necdet <necdetyucel@gmail.com>\n"
+"POT-Creation-Date: 2022-12-22 00:43+0000\n"
+"PO-Revision-Date: 2023-01-18 22:31+0300\n"
+"Last-Translator: Emir SARI <emir_sari@icloud.com>\n"
 "Language-Team: Turkish <kde-l10n-tr@kde.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 22.12.1\n"
 
 #, kde-format
 msgctxt "NAME OF TRANSLATORS"
@@ -112,7 +113,7 @@ msgstr "Dosya denetimini kapat (artık bir etkiye sahip değildir)"
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Perform menu generation test run only"
-msgstr "Sadece menü oluşturma denemesi yap"
+msgstr "Yalnızca menü oluşturma denemesi yap"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:112
 #, kde-format
@@ -124,7 +125,7 @@ msgstr "Hata ayıklama işlemi için menü kimliğini izle"
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Switch QStandardPaths to test mode, for unit tests only"
-msgstr "QStandardPaths test kipine geçir, sadece birim testleri için"
+msgstr "QStandardPaths test kipine geçir, yalnızca birim testleri için"
 
 #: kdeinit/ktoolinvocation.cpp:60
 #, kde-format
@@ -156,7 +157,7 @@ msgid ""
 "\n"
 "%1"
 msgstr ""
-"E-posta programı çalıştırılamadı: \n"
+"E-posta programı çalıştırılamadı:\n"
 "\n"
 "%1"
 
@@ -189,7 +190,7 @@ msgstr "Web tarayıcı başlatılamadı"
 #: kdeinit/ktoolinvocation_x11.cpp:342
 #, kde-format
 msgid "Unable to determine the default terminal"
-msgstr ""
+msgstr "Öntanımlı uçbirim algılanamıyor"
 
 #: kdeinit/ktoolinvocation_x11.cpp:354
 #, kde-format
@@ -210,14 +211,14 @@ msgstr "Uçbirim İstemcisi başlatılamadı"
 #: plugin/kdbusservicestarter.cpp:68
 #, kde-format
 msgid "No service implementing %1"
-msgstr "%1 kullanan servis yok"
+msgstr "%1 kullanan hizmet yok"
 
-#: services/kservice.cpp:1066
+#: services/kservice.cpp:1120
 #, kde-format
 msgid "The provided service is not valid"
-msgstr "Sağlanan servis geçerli değil"
+msgstr "Sağlanan hizmet geçerli değil"
 
-#: services/kservice.cpp:1070
+#: services/kservice.cpp:1124
 #, kde-format
 msgid "The service '%1' provides no library or the Library key is missing"
-msgstr "'%1' servisi hiçbir kitaplık sağlamıyor veya kitaplık anahtarı eksik"
+msgstr "'%1' hizmeti hiçbir kitaplık sağlamıyor veya kitaplık anahtarı eksik"

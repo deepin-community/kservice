@@ -253,6 +253,7 @@ libKF5Service.so.5 libkf5service5 #MINVER#, libkf5service-bin
  _ZN18KApplicationTrader13isSubsequenceERK7QStringS2_N2Qt15CaseSensitivityE@Base 5.69.0
  _ZN18KApplicationTrader15queryByMimeTypeERK7QStringSt8functionIFbRK28QExplicitlySharedDataPointerI8KServiceEEE@Base 5.69.0
  _ZN18KApplicationTrader16preferredServiceERK7QString@Base 5.69.0
+ _ZN18KApplicationTrader19setPreferredServiceERK7QString28QExplicitlySharedDataPointerI8KServiceE@Base 5.101.0
  _ZN18KApplicationTrader5queryESt8functionIFbRK28QExplicitlySharedDataPointerI8KServiceEEE@Base 5.69.0
  _ZN18KServiceTypeTrader14weightedOffersERK7QString@Base 4.96.0
  _ZN18KServiceTypeTrader16applyConstraintsER5QListI28QExplicitlySharedDataPointerI8KServiceEERK7QString@Base 4.96.0
@@ -423,6 +424,7 @@ libKF5Service.so.5 libkf5service5 #MINVER#, libkf5service-bin
  _ZNK14KServiceAction4nameEv@Base 4.96.0
  _ZNK14KServiceAction4textEv@Base 4.96.0
  _ZNK14KServiceAction7serviceEv@Base 5.69.0
+ _ZNK14KServiceAction8propertyERK7QStringN9QMetaType4TypeE@Base 5.102.0
  _ZNK14KServiceAction9noDisplayEv@Base 4.96.0
  _ZNK14KSycocaFactory10allEntriesEv@Base 4.96.0
  _ZNK14KSycocaFactory10sycocaDictEv@Base 4.96.0
@@ -466,8 +468,10 @@ libKF5Service.so.5 libkf5service5 #MINVER#, libkf5service-bin
  _ZNK8KService7commentEv@Base 4.96.0
  _ZNK8KService7docPathEv@Base 4.96.0
  _ZNK8KService7libraryEv@Base 4.96.0
+ _ZNK8KService8aliasForEv@Base 5.96.0
  _ZNK8KService8keywordsEv@Base 4.96.0
  _ZNK8KService8propertyERK7QStringN8QVariant4TypeE@Base 4.96.0
+ _ZNK8KService8propertyERK7QStringN9QMetaType4TypeE@Base 5.102.0
  _ZNK8KService8terminalEv@Base 4.96.0
  _ZNK8KService8usernameEv@Base 4.96.0
  _ZNK8KService9mimeTypesEv@Base 4.96.0

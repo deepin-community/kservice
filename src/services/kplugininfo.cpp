@@ -8,6 +8,9 @@
 
 #include "kplugininfo.h"
 
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
+
 #if KSERVICE_BUILD_DEPRECATED_SINCE(5, 90)
 #include "servicesdebug.h"
 #include <QDirIterator>
@@ -277,7 +280,11 @@ KPluginInfo::KPluginInfo(const QString &filename /*, QStandardPaths::StandardLoc
         return;
     }
 
-    d->setMetaData(KPluginMetaData(file.fileName()), true);
+    if (file.fileName().endsWith(QLatin1String(".desktop"))) {
+        d->setMetaData(KPluginMetaData::fromDesktopFile(file.fileName()), true);
+    } else {
+        d->setMetaData(KPluginMetaData(file.fileName()), true);
+    }
     if (!d->metaData.isValid()) {
         qCWarning(SERVICES) << "Failed to read metadata from .desktop file" << file.fileName();
         d.reset();
@@ -327,9 +334,9 @@ KPluginInfo::KPluginInfo(const KService::Ptr service)
     QJsonObject json;
     const auto propertyList = service->propertyNames();
     for (const QString &key : propertyList) {
-        QVariant::Type t = KSycocaPrivate::self()->serviceTypeFactory()->findPropertyTypeByName(key);
-        if (t == QVariant::Invalid) {
-            t = QVariant::String; // default to string if the type is not known
+        QMetaType::Type t = KSycocaPrivate::self()->serviceTypeFactory()->findPropertyTypeByName(key);
+        if (t == QMetaType::UnknownType) {
+            t = QMetaType::QString; // default to string if the type is not known
         }
         QVariant v = service->property(key, t);
         if (v.isValid()) {
@@ -443,11 +450,14 @@ QList<KPluginInfo> KPluginInfo::fromServices(const KService::List &services, con
 QList<KPluginInfo> KPluginInfo::fromFiles(const QStringList &files, const KConfigGroup &config)
 {
     QList<KPluginInfo> infolist;
-    for (QStringList::ConstIterator it = files.begin(); it != files.end(); ++it) {
-        KPluginInfo info(*it);
+    infolist.reserve(files.size());
+
+    std::transform(files.cbegin(), files.cend(), std::back_inserter(infolist), [&config](const QString &file) {
+        KPluginInfo info(file);
         info.setConfig(config);
-        infolist += info;
-    }
+        return info;
+    });
+
     return infolist;
 }
 
@@ -578,11 +588,7 @@ QString KPluginInfo::license() const
 QStringList KPluginInfo::dependencies() const
 {
     KPLUGININFO_ISVALID_ASSERTION;
-    QT_WARNING_PUSH
-    QT_WARNING_DISABLE_CLANG("-Wdeprecated-declarations")
-    QT_WARNING_DISABLE_GCC("-Wdeprecated-declarations")
     return d->metaData.dependencies();
-    QT_WARNING_POP
 }
 #endif
 
@@ -636,10 +642,10 @@ QVariant KPluginInfo::property(const QString &key) const
     QVariant result = d->metaData.rawData().value(key).toVariant();
     if (result.isValid()) {
         KSycoca::self()->ensureCacheValid();
-        const QVariant::Type t = KSycocaPrivate::self()->serviceTypeFactory()->findPropertyTypeByName(key);
+        const QMetaType::Type t = KSycocaPrivate::self()->serviceTypeFactory()->findPropertyTypeByName(key);
 
         // special case if we want a stringlist: split values by ',' or ';' and construct the list
-        if (t == QVariant::StringList) {
+        if (t == QMetaType::QStringList) {
             if (result.canConvert<QString>()) {
                 result = KPluginInfoPrivate::deserializeList(result.toString());
             } else if (result.canConvert<QVariantList>()) {

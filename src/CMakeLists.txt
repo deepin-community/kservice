@@ -120,7 +120,7 @@ ecm_generate_export_header(KF5Service
     GROUP_BASE_NAME KF
     VERSION ${KF_VERSION}
     DEPRECATED_BASE_VERSION 0
-    DEPRECATION_VERSIONS 5.0 5.15 5.61 5.63 5.66 5.67 5.70 5.71 5.79 5.80 5.81 5.82 5.83 5.86 5.87 5.88 5.89 5.90
+    DEPRECATION_VERSIONS 5.0 5.15 5.61 5.63 5.66 5.67 5.70 5.71 5.79 5.80 5.81 5.82 5.83 5.86 5.87 5.88 5.89 5.90 5.102
     EXCLUDE_DEPRECATED_BEFORE_AND_AT ${EXCLUDE_DEPRECATED_BEFORE_AND_AT}
 )
 set(kservice_includes
@@ -138,13 +138,28 @@ target_include_directories(KF5Service
 )
 
 target_link_libraries(KF5Service
-  PUBLIC
-    KF5::ConfigCore   # KConfig and friends
-    KF5::CoreAddons   # KShell KPluginLoader
   PRIVATE
     KF5::I18n
     Qt${QT_MAJOR_VERSION}::Xml  # (for vfolder menu) QDomDocument
 )
+
+if(NOT EXCLUDE_DEPRECATED_BEFORE_AND_AT STREQUAL "CURRENT" AND
+   EXCLUDE_DEPRECATED_BEFORE_AND_AT VERSION_LESS 5.94.0)
+    target_link_libraries(KF5Service
+    PUBLIC
+        KF5::ConfigCore   # KConfig and friends
+        KF5::CoreAddons   # KShell KPluginLoader
+    )
+else()
+    target_link_libraries(KF5Service
+    PUBLIC
+        Qt${QT_MAJOR_VERSION}::Core
+    PRIVATE
+        KF5::ConfigCore   # KConfig and friends
+        KF5::CoreAddons   # KShell KPluginLoader
+    )
+endif()
+
 if (TARGET KF5::DBusAddons)
   target_link_libraries(KF5Service PRIVATE KF5::DBusAddons)  # KDEInitInterface
 endif()
@@ -212,7 +227,7 @@ add_custom_command(TARGET KF5Service PRE_BUILD COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/applications.menu
     ${CMAKE_BINARY_DIR}/bin/data/menus/${APPLICATIONS_MENU_NAME})
 
-install(TARGETS KF5Service EXPORT KF5ServiceTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS KF5Service EXPORT KF5ServiceTargets ${KF_INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES
    "${CMAKE_CURRENT_BINARY_DIR}/kservice_export.h"

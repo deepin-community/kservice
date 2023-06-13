@@ -129,7 +129,7 @@ KService::Ptr KBuildSycoca::createService(const QString &path)
 
 static QStringList locateDirInResource(const QString &resourceSubdir)
 {
-    const QString dir = QStringLiteral(":/kf/") + resourceSubdir;
+    const QString dir = QStringLiteral(":/") + resourceSubdir; // e.g. :/kservicetypes5
     if (QDir(dir).exists()) {
         return {dir};
     }
@@ -196,7 +196,7 @@ bool KBuildSycoca::build()
     }
 
     m_ctimeFactory = new KCTimeFactory(this); // This is a build factory too, don't delete!!
-    for (QMap<QString, QByteArray>::ConstIterator it1 = allResourcesSubDirs.constBegin(); it1 != allResourcesSubDirs.constEnd(); ++it1) {
+    for (auto it1 = allResourcesSubDirs.cbegin(); it1 != allResourcesSubDirs.cend(); ++it1) {
         m_changed = false;
         m_resourceSubdir = it1.key();
         m_resource = it1.value();
@@ -607,7 +607,15 @@ static quint32 updateHash(const QString &file, quint32 hash)
     if (fi.isReadable() && fi.isFile()) {
         // This was using buff.st_ctime (in Waldo's initial commit to kstandarddirs.cpp in 2001), but that looks wrong?
         // Surely we want to catch manual editing, while a chmod doesn't matter much?
-        hash += fi.lastModified().toSecsSinceEpoch();
+        qint64 timestamp = fi.lastModified().toSecsSinceEpoch();
+        // On some systems (i.e. Fedora Kinoite), all files in /usr have a last
+        // modified timestamp of 0 (UNIX Epoch). In this case, always assume
+        // the file as been changed.
+        if (timestamp == 0) {
+            static qint64 now = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+            timestamp = now;
+        }
+        hash += timestamp;
     }
     return hash;
 }
@@ -619,7 +627,7 @@ quint32 KBuildSycoca::calcResourceHash(const QString &resourceSubDir, const QStr
         return updateHash(filename, hash);
     }
     const QString filePath = resourceSubDir + QLatin1Char('/') + filename;
-    const QString qrcFilePath = QStringLiteral(":/kf/") + filePath;
+    const QString qrcFilePath = QStringLiteral(":/") + filePath;
     const QStringList files =
         QFileInfo::exists(qrcFilePath) ? QStringList{qrcFilePath} : QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, filePath);
     for (const QString &file : files) {

@@ -1,5 +1,4 @@
 usr/include/KF5/KService/
-usr/include/KF5/kservice_version.h
 usr/lib/*/cmake/KF5Service/
 usr/lib/*/libKF5Service.so
 usr/lib/*/qt5/mkspecs/modules/qt_KService.pri

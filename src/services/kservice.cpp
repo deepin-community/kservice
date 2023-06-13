@@ -2,6 +2,7 @@
     This file is part of the KDE libraries
     SPDX-FileCopyrightText: 1999-2001 Waldo Bastian <bastian@kde.org>
     SPDX-FileCopyrightText: 1999-2005 David Faure <faure@kde.org>
+    SPDX-FileCopyrightText: 2022 Harald Sitter <sitter@kde.org>
 
     SPDX-License-Identifier: LGPL-2.0-only
 */
@@ -46,6 +47,12 @@ QDataStream &operator>>(QDataStream &s, KService::ServiceTypeAndPreference &st)
 void KServicePrivate::init(const KDesktopFile *config, KService *q)
 {
     const QString entryPath = q->entryPath();
+    if (entryPath.isEmpty()) {
+        // We are opening a "" service, this means whatever warning we might get is going to be misleading
+        m_bValid = false;
+        return;
+    }
+
     bool absPath = !QDir::isRelativePath(entryPath);
 
     // TODO: it makes sense to have a KConstConfigGroup I guess
@@ -214,6 +221,7 @@ void KServicePrivate::init(const KDesktopFile *config, KService *q)
         parseActions(config, q);
     }
 
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
     QString dbusStartupType = desktopGroup.readEntry("X-DBUS-StartupType").toLower();
     entryMap.remove(QStringLiteral("X-DBUS-StartupType"));
     if (dbusStartupType == QLatin1String("unique")) {
@@ -223,6 +231,7 @@ void KServicePrivate::init(const KDesktopFile *config, KService *q)
     } else {
         m_DBUSStartusType = KService::DBusNone;
     }
+#endif
 
     m_strDesktopEntryName = _name;
 
@@ -243,28 +252,28 @@ void KServicePrivate::init(const KDesktopFile *config, KService *q)
     entryMap.remove(QStringLiteral("AllowDefault"));
 
     // allow plugin users to translate categories without needing a separate key
-    QMap<QString, QString>::Iterator entry = entryMap.find(QStringLiteral("X-KDE-PluginInfo-Category"));
-    if (entry != entryMap.end()) {
-        const QString &key = entry.key();
+    auto entryIt = entryMap.find(QStringLiteral("X-KDE-PluginInfo-Category"));
+    if (entryIt != entryMap.end()) {
+        const QString &key = entryIt.key();
         m_mapProps.insert(key, QVariant(desktopGroup.readEntryUntranslated(key)));
-        m_mapProps.insert(key + QLatin1String("-Translated"), QVariant(*entry));
-        entryMap.erase(entry);
+        m_mapProps.insert(key + QLatin1String("-Translated"), QVariant(entryIt.value()));
+        entryMap.erase(entryIt);
     }
 
     // Store all additional entries in the property map.
     // A QMap<QString,QString> would be easier for this but we can't
     // break BC, so we have to store it in m_mapProps.
     //  qDebug("Path = %s", entryPath.toLatin1().constData());
-    QMap<QString, QString>::ConstIterator it = entryMap.constBegin();
+    auto it = entryMap.constBegin();
     for (; it != entryMap.constEnd(); ++it) {
         const QString key = it.key();
         // do not store other translations like Name[fr]; kbuildsycoca will rerun if we change languages anyway
         if (!key.contains(QLatin1Char('['))) {
-            // qCDebug(SERVICES) << "  Key =" << key << " Data =" << *it;
+            // qCDebug(SERVICES) << "  Key =" << key << " Data =" << it.value();
             if (key == QLatin1String("X-Flatpak-RenamedFrom")) {
                 m_mapProps.insert(key, desktopGroup.readXdgListEntry(key));
             } else {
-                m_mapProps.insert(key, QVariant(*it));
+                m_mapProps.insert(key, QVariant(it.value()));
             }
         }
     }
@@ -279,10 +288,7 @@ void KServicePrivate::parseActions(const KDesktopFile *config, KService *q)
 
     KService::Ptr serviceClone(new KService(*q));
 
-    QStringList::ConstIterator it = keys.begin();
-    const QStringList::ConstIterator end = keys.end();
-    for (; it != end; ++it) {
-        const QString group = *it;
+    for (const QString &group : keys) {
         if (group == QLatin1String("_SEPARATOR_")) {
             m_actions.append(KServiceAction(group, QString(), QString(), QString(), false, serviceClone));
             continue;
@@ -293,8 +299,23 @@ void KServicePrivate::parseActions(const KDesktopFile *config, KService *q)
             if (!cg.hasKey("Name") || !cg.hasKey("Exec")) {
                 qCWarning(SERVICES) << "The action" << group << "in the desktop file" << q->entryPath() << "has no Name or no Exec key";
             } else {
-                m_actions.append(
-                    KServiceAction(group, cg.readEntry("Name"), cg.readEntry("Icon"), cg.readEntry("Exec"), cg.readEntry("NoDisplay", false), serviceClone));
+                const QMap<QString, QString> entries = cg.entryMap();
+
+                QVariantMap entriesVariants;
+
+                for (auto it = entries.constKeyValueBegin(); it != entries.constKeyValueEnd(); ++it) {
+                    // Those are stored separately
+                    if (it->first == QLatin1String("Name") || it->first == QLatin1String("Icon") || it->first == QLatin1String("Exec")
+                        || it->first == QLatin1String("NoDisplay")) {
+                        continue;
+                    }
+
+                    entriesVariants.insert(it->first, it->second);
+                }
+
+                KServiceAction action(group, cg.readEntry("Name"), cg.readEntry("Icon"), cg.readEntry("Exec"), cg.readEntry("NoDisplay", false), serviceClone);
+                action.setData(QVariant::fromValue(entriesVariants));
+                m_actions.append(action);
             }
         } else {
             qCWarning(SERVICES) << "The desktop file" << q->entryPath() << "references the action" << group << "but doesn't define it";
@@ -328,7 +349,9 @@ void KServicePrivate::load(QDataStream &s)
 
     m_bAllowAsDefault = bool(def);
     m_bTerminal = bool(term);
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
     m_DBUSStartusType = static_cast<KService::DBusStartupType>(dst);
+#endif
     m_initialPreference = initpref;
 
     m_bValid = true;
@@ -340,7 +363,11 @@ void KServicePrivate::save(QDataStream &s)
     qint8 def = m_bAllowAsDefault;
     qint8 initpref = m_initialPreference;
     qint8 term = m_bTerminal;
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
     qint8 dst = qint8(m_DBUSStartusType);
+#else
+    qint8 dst = 0;
+#endif
 
     // WARNING: THIS NEEDS TO REMAIN COMPATIBLE WITH PREVIOUS KService 5.x VERSIONS!
     // !! This data structure should remain binary compatible at all times !!
@@ -425,20 +452,24 @@ bool KService::hasServiceType(const QString &serviceType) const
     // fall-back code for services that are NOT from ksycoca
     // For each service type we are associated with, if it doesn't
     // match then we try its parent service types.
-    QVector<ServiceTypeAndPreference>::ConstIterator it = d->m_serviceTypes.begin();
-    for (; it != d->m_serviceTypes.end(); ++it) {
-        const QString &st = (*it).serviceType;
-        // qCDebug(SERVICES) << "    has " << (*it);
-        if (st == ptr->name()) {
+    const QString serviceTypeName = ptr->name();
+    auto matchFunc = [&serviceTypeName](const ServiceTypeAndPreference &typePref) {
+        const QString &st = typePref.serviceType;
+        // qCDebug(SERVICES) << "    has " << typePref;
+        if (st == serviceTypeName) {
             return true;
         }
+
         // also the case of parent servicetypes
         KServiceType::Ptr p = KServiceType::serviceType(st);
-        if (p && p->inherits(ptr->name())) {
+        if (p && p->inherits(serviceTypeName)) {
             return true;
         }
-    }
-    return false;
+
+        return false;
+    };
+
+    return std::any_of(d->m_serviceTypes.cbegin(), d->m_serviceTypes.cend(), matchFunc);
 }
 
 bool KService::hasMimeType(const QString &mimeType) const
@@ -461,25 +492,25 @@ bool KService::hasMimeType(const QString &mimeType) const
         return KSycocaPrivate::self()->serviceFactory()->hasOffer(mimeOffset, serviceOffersOffset, serviceOffset);
     }
 
-    // fall-back code for services that are NOT from ksycoca
-    QVector<ServiceTypeAndPreference>::ConstIterator it = d->m_serviceTypes.begin();
-    for (; it != d->m_serviceTypes.end(); ++it) {
-        const QString &st = (*it).serviceType;
-        // qCDebug(SERVICES) << "    has " << (*it);
-        if (st == mime) {
+    auto matchFunc = [&mime](const ServiceTypeAndPreference &typePref) {
+        // qCDebug(SERVICES) << "    has " << typePref;
+        if (typePref.serviceType == mime) {
             return true;
         }
         // TODO: should we handle inherited MIME types here?
         // KMimeType was in kio when this code was written, this is the only reason it's not done.
         // But this should matter only in a very rare case, since most code gets KServices from ksycoca.
         // Warning, change hasServiceType if you implement this here (and check kbuildservicefactory).
-    }
-    return false;
+        return false;
+    };
+
+    // fall-back code for services that are NOT from ksycoca
+    return std::any_of(d->m_serviceTypes.cbegin(), d->m_serviceTypes.cend(), matchFunc);
 }
 
 QVariant KServicePrivate::property(const QString &_name) const
 {
-    return property(_name, QVariant::Invalid);
+    return property(_name, QMetaType::UnknownType);
 }
 
 // Return a string QVariant if string isn't null, and invalid variant otherwise
@@ -492,13 +523,21 @@ static QVariant makeStringVariant(const QString &string)
     return string.isNull() ? QVariant() : QVariant(string);
 }
 
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
 QVariant KService::property(const QString &_name, QVariant::Type t) const
+{
+    Q_D(const KService);
+    return d->property(_name, (QMetaType::Type)t);
+}
+#endif
+
+QVariant KService::property(const QString &_name, QMetaType::Type t) const
 {
     Q_D(const KService);
     return d->property(_name, t);
 }
 
-QVariant KServicePrivate::property(const QString &_name, QVariant::Type t) const
+QVariant KServicePrivate::property(const QString &_name, QMetaType::Type t) const
 {
     if (_name == QLatin1String("Type")) {
         return QVariant(m_strType); // can't be null
@@ -540,63 +579,63 @@ QVariant KServicePrivate::property(const QString &_name, QVariant::Type t) const
 
     // Ok we need to convert the property from a QString to its real type.
     // Maybe the caller helped us.
-    if (t == QVariant::Invalid) {
+    if (t == QMetaType::UnknownType) {
         // No luck, let's ask KServiceTypeFactory what the type of this property
         // is supposed to be.
         // ######### this looks in all servicetypes, not just the ones this service supports!
         KSycoca::self()->ensureCacheValid();
         t = KSycocaPrivate::self()->serviceTypeFactory()->findPropertyTypeByName(_name);
-        if (t == QVariant::Invalid) {
+        if (t == QMetaType::UnknownType) {
             qCDebug(SERVICES) << "Request for unknown property" << _name;
             return QVariant(); // Unknown property: Invalid variant.
         }
     }
 
-    QMap<QString, QVariant>::ConstIterator it = m_mapProps.find(_name);
-    if ((it == m_mapProps.end()) || (!it->isValid())) {
+    auto it = m_mapProps.constFind(_name);
+    if (it == m_mapProps.cend() || !it.value().isValid()) {
         // qCDebug(SERVICES) << "Property not found " << _name;
         return QVariant(); // No property set.
     }
 
-    if (t == QVariant::String) {
-        return *it; // no conversion necessary
+    if (t == QMetaType::QString) {
+        return it.value(); // no conversion necessary
     } else {
         // All others
         // For instance properties defined as StringList, like MimeTypes.
         // XXX This API is accessible only through a friend declaration.
-        return KConfigGroup::convertToQVariant(_name.toUtf8().constData(), it->toString().toUtf8(), QVariant(t));
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        return KConfigGroup::convertToQVariant(_name.toUtf8().constData(), it.value().toString().toUtf8(), QVariant(static_cast<QVariant::Type>(t)));
+#else
+        return KConfigGroup::convertToQVariant(_name.toUtf8().constData(), it.value().toString().toUtf8(), QVariant(QMetaType(t)));
+#endif
     }
 }
 
 QStringList KServicePrivate::propertyNames() const
 {
-    QStringList res;
+    static const QStringList defaultKeys = {
+        QStringLiteral("Type"),
+        QStringLiteral("Name"),
+        QStringLiteral("Comment"),
+        QStringLiteral("GenericName"),
+        QStringLiteral("Icon"),
+        QStringLiteral("Exec"),
+        QStringLiteral("Terminal"),
+        QStringLiteral("TerminalOptions"),
+        QStringLiteral("Path"),
+        QStringLiteral("ServiceTypes"),
+        QStringLiteral("AllowAsDefault"),
+        QStringLiteral("InitialPreference"),
+        QStringLiteral("Library"),
+        QStringLiteral("DesktopEntryPath"),
+        QStringLiteral("DesktopEntryName"),
+        QStringLiteral("Keywords"),
+        QStringLiteral("FormFactors"),
+        QStringLiteral("Categories"),
+    };
 
-    QMap<QString, QVariant>::ConstIterator it = m_mapProps.begin();
-    for (; it != m_mapProps.end(); ++it) {
-        res.append(it.key());
-    }
-
-    res.append(QStringLiteral("Type"));
-    res.append(QStringLiteral("Name"));
-    res.append(QStringLiteral("Comment"));
-    res.append(QStringLiteral("GenericName"));
-    res.append(QStringLiteral("Icon"));
-    res.append(QStringLiteral("Exec"));
-    res.append(QStringLiteral("Terminal"));
-    res.append(QStringLiteral("TerminalOptions"));
-    res.append(QStringLiteral("Path"));
-    res.append(QStringLiteral("ServiceTypes"));
-    res.append(QStringLiteral("AllowAsDefault"));
-    res.append(QStringLiteral("InitialPreference"));
-    res.append(QStringLiteral("Library"));
-    res.append(QStringLiteral("DesktopEntryPath"));
-    res.append(QStringLiteral("DesktopEntryName"));
-    res.append(QStringLiteral("Keywords"));
-    res.append(QStringLiteral("FormFactors"));
-    res.append(QStringLiteral("Categories"));
-
-    return res;
+    return m_mapProps.keys() + defaultKeys;
 }
 
 KService::List KService::allServices()
@@ -631,7 +670,7 @@ KService::Ptr KService::serviceByStorageId(const QString &_storageId)
 
 bool KService::substituteUid() const
 {
-    QVariant v = property(QStringLiteral("X-KDE-SubstituteUID"), QVariant::Bool);
+    QVariant v = property(QStringLiteral("X-KDE-SubstituteUID"), QMetaType::Bool);
     return v.isValid() && v.toBool();
 }
 
@@ -639,7 +678,7 @@ QString KService::username() const
 {
     // See also KDesktopFile::tryExec()
     QString user;
-    QVariant v = property(QStringLiteral("X-KDE-Username"), QVariant::String);
+    QVariant v = property(QStringLiteral("X-KDE-Username"), QMetaType::QString);
     user = v.isValid() ? v.toString() : QString();
     if (user.isEmpty()) {
         user = QString::fromLocal8Bit(qgetenv("ADMIN_ACCOUNT"));
@@ -675,26 +714,28 @@ bool KService::showInCurrentDesktop() const
 
     // This algorithm is described in the desktop entry spec
 
-    QMap<QString, QVariant>::ConstIterator it = d->m_mapProps.find(QStringLiteral("OnlyShowIn"));
-    if ((it != d->m_mapProps.end()) && (it->isValid())) {
-        const QStringList aList = it->toString().split(QLatin1Char(';'));
-        for (const auto &desktop : std::as_const(currentDesktops)) {
-            if (aList.contains(desktop)) {
-                return true;
-            }
+    auto it = d->m_mapProps.constFind(QStringLiteral("OnlyShowIn"));
+    if (it != d->m_mapProps.cend()) {
+        const QVariant &val = it.value();
+        if (val.isValid()) {
+            const QStringList aList = val.toString().split(QLatin1Char(';'));
+            return std::any_of(currentDesktops.cbegin(), currentDesktops.cend(), [&aList](const auto desktop) {
+                return aList.contains(desktop);
+            });
         }
-        return false;
     }
 
-    it = d->m_mapProps.find(QStringLiteral("NotShowIn"));
-    if ((it != d->m_mapProps.end()) && (it->isValid())) {
-        const QStringList aList = it->toString().split(QLatin1Char(';'));
-        for (const auto &desktop : std::as_const(currentDesktops)) {
-            if (aList.contains(desktop)) {
-                return false;
-            }
+    it = d->m_mapProps.constFind(QStringLiteral("NotShowIn"));
+    if (it != d->m_mapProps.cend()) {
+        const QVariant &val = it.value();
+        if (val.isValid()) {
+            const QStringList aList = val.toString().split(QLatin1Char(';'));
+            return std::none_of(currentDesktops.cbegin(), currentDesktops.cend(), [&aList](const auto desktop) {
+                return aList.contains(desktop);
+            });
         }
     }
+
     return true;
 }
 
@@ -726,7 +767,7 @@ bool KService::showOnCurrentPlatform() const
 
 bool KService::noDisplay() const
 {
-    if (qvariant_cast<bool>(property(QStringLiteral("NoDisplay"), QVariant::Bool))) {
+    if (qvariant_cast<bool>(property(QStringLiteral("NoDisplay"), QMetaType::Bool))) {
         return true;
     }
 
@@ -747,7 +788,7 @@ bool KService::noDisplay() const
 
 QString KService::untranslatedGenericName() const
 {
-    QVariant v = property(QStringLiteral("UntranslatedGenericName"), QVariant::String);
+    QVariant v = property(QStringLiteral("UntranslatedGenericName"), QMetaType::QString);
     return v.isValid() ? v.toString() : QString();
 }
 
@@ -755,12 +796,15 @@ QString KService::untranslatedGenericName() const
 QString KService::parentApp() const
 {
     Q_D(const KService);
-    QMap<QString, QVariant>::ConstIterator it = d->m_mapProps.find(QStringLiteral("X-KDE-ParentApp"));
-    if ((it == d->m_mapProps.end()) || (!it->isValid())) {
-        return QString();
+    auto it = d->m_mapProps.constFind(QStringLiteral("X-KDE-ParentApp"));
+    if (it != d->m_mapProps.cend()) {
+        const QVariant &val = it.value();
+        if (val.isValid()) {
+            return val.toString();
+        }
     }
 
-    return it->toString();
+    return {};
 }
 #endif
 
@@ -780,15 +824,20 @@ QString KService::pluginKeyword() const
 QString KService::docPath() const
 {
     Q_D(const KService);
-    QMap<QString, QVariant>::ConstIterator it = d->m_mapProps.find(QStringLiteral("X-DocPath"));
-    if ((it == d->m_mapProps.end()) || (!it->isValid())) {
-        it = d->m_mapProps.find(QStringLiteral("DocPath"));
-        if ((it == d->m_mapProps.end()) || (!it->isValid())) {
-            return QString();
+
+    for (const QString &str : {QStringLiteral("X-DocPath"), QStringLiteral("DocPath")}) {
+        auto it = d->m_mapProps.constFind(str);
+        if (it != d->m_mapProps.cend()) {
+            const QVariant variant = it.value();
+            Q_ASSERT(variant.isValid());
+            const QString path = variant.toString();
+            if (!path.isEmpty()) {
+                return path;
+            }
         }
     }
 
-    return it->toString();
+    return {};
 }
 
 bool KService::allowMultipleFiles() const
@@ -915,10 +964,10 @@ bool KService::terminal() const
 
 bool KService::runOnDiscreteGpu() const
 {
-    QVariant prop = property(QStringLiteral("PrefersNonDefaultGPU"), QVariant::Bool);
+    QVariant prop = property(QStringLiteral("PrefersNonDefaultGPU"), QMetaType::Bool);
     if (!prop.isValid()) {
         // For backwards compatibility
-        prop = property(QStringLiteral("X-KDE-RunOnDiscreteGpu"), QVariant::Bool);
+        prop = property(QStringLiteral("X-KDE-RunOnDiscreteGpu"), QMetaType::Bool);
     }
 
     return prop.isValid() && prop.toBool();
@@ -930,11 +979,13 @@ QString KService::desktopEntryName() const
     return d->m_strDesktopEntryName;
 }
 
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
 KService::DBusStartupType KService::dbusStartupType() const
 {
     Q_D(const KService);
     return d->m_DBUSStartusType;
 }
+#endif
 
 #if KSERVICE_BUILD_DEPRECATED_SINCE(5, 63)
 QString KService::path() const
@@ -971,11 +1022,13 @@ QStringList KService::keywords() const
 QStringList KServicePrivate::serviceTypes() const
 {
     QStringList ret;
-    QVector<KService::ServiceTypeAndPreference>::const_iterator it = m_serviceTypes.begin();
-    for (; it < m_serviceTypes.end(); ++it) {
-        Q_ASSERT(!(*it).serviceType.isEmpty());
-        ret.append((*it).serviceType);
-    }
+    ret.reserve(m_serviceTypes.size());
+
+    std::transform(m_serviceTypes.cbegin(), m_serviceTypes.cend(), std::back_inserter(ret), [](const KService::ServiceTypeAndPreference &typePref) {
+        Q_ASSERT(!typePref.serviceType.isEmpty());
+        return typePref.serviceType;
+    });
+
     return ret;
 }
 
@@ -988,13 +1041,14 @@ QStringList KService::serviceTypes() const
 QStringList KService::mimeTypes() const
 {
     Q_D(const KService);
-    QStringList ret;
+
     QMimeDatabase db;
-    QVector<KService::ServiceTypeAndPreference>::const_iterator it = d->m_serviceTypes.begin();
-    for (; it < d->m_serviceTypes.end(); ++it) {
-        const QString sv = (*it).serviceType;
-        if (db.mimeTypeForName(sv).isValid()) { // keep only mimetypes, filter out servicetypes
-            ret.append(sv);
+    QStringList ret;
+
+    for (const KService::ServiceTypeAndPreference &s : d->m_serviceTypes) {
+        const QString servType = s.serviceType;
+        if (db.mimeTypeForName(servType).isValid()) { // keep only mimetypes, filter out servicetypes
+            ret.append(servType);
         }
     }
     return ret;
@@ -1074,3 +1128,8 @@ KService::operator KPluginName() const
 }
 #endif
 #endif
+
+QString KService::aliasFor() const
+{
+    return KServiceUtilPrivate::completeBaseName(property(QStringLiteral("X-KDE-AliasFor"), QMetaType::QString).toString());
+}
