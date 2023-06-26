@@ -46,6 +46,7 @@ Name[id]=Aplikasi
 Name[is]=Forrit
 Name[it]=Applicazione
 Name[ja]=アプリケーション
+Name[ka]=აპლიკაცია
 Name[kk]=Қолданба
 Name[km]=កម្មវិធី
 Name[kn]=ಅನ್ವಯ
@@ -146,6 +147,9 @@ Type=QStringList
 [PropertyDef::X-GNOME-UsesNotifications]
 Type=bool
 
+[PropertyDef::X-Flatpak]
+Type=QString
+
 [PropertyDef::X-Flatpak-RenamedFrom]
 Type=QStringList
 
@@ -156,4 +160,10 @@ Type=QStringList
 Type=bool
 
 [PropertyDef::X-KDE-DBUS-Restricted-Interfaces]
+Type=QStringList
+
+[PropertyDef::X-KDE-AliasFor]
+Type=QString
+
+[PropertyDef::X-KDE-Shortcuts]
 Type=QStringList

@@ -60,7 +60,7 @@ public:
 
     QStringList propertyNames() const override;
 
-    QVariant property(const QString &_name, QVariant::Type t) const;
+    QVariant property(const QString &_name, QMetaType::Type t) const;
 
     QStringList serviceTypes() const;
 
@@ -80,7 +80,9 @@ public:
     QVector<KService::ServiceTypeAndPreference> m_serviceTypes;
 
     QString m_strDesktopEntryName;
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
     KService::DBusStartupType m_DBUSStartusType;
+#endif
     QMap<QString, QVariant> m_mapProps;
     QStringList m_lstFormFactors;
     QStringList m_lstKeywords;

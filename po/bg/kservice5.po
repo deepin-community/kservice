@@ -3,19 +3,20 @@
 #
 # Zlatko Popov <zlatkopopov@fsa-bg.org>, 2006, 2007, 2008, 2009.
 # Yasen Pramatarov <yasen@lindeas.com>, 2009, 2010, 2011, 2012, 2013.
+# Mincho Kondarev <mkondarev@yahoo.de>, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: kdelibs4\n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2021-09-19 00:15+0000\n"
-"PO-Revision-Date: 2013-07-23 01:52+0300\n"
-"Last-Translator: Yasen Pramatarov <yasen@lindeas.com>\n"
-"Language-Team: Bulgarian <dict@ludost.net>\n"
+"POT-Creation-Date: 2022-12-22 00:43+0000\n"
+"PO-Revision-Date: 2022-06-28 09:53+0200\n"
+"Last-Translator: Mincho Kondarev <mkondarev@yahoo.de>\n"
+"Language-Team: Bulgarian <kde-i18n-doc@kde.org>\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 22.04.2\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #, kde-format
@@ -29,93 +30,88 @@ msgid "Your emails"
 msgstr "yasen@lindeas.com,radnev@yahoo.com,zlatkopopov@fsa-bg.org"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:90
-#, fuzzy, kde-format
-#| msgid "KBuildSycoca"
+#, kde-format
 msgctxt "application name"
 msgid "KBuildSycoca"
 msgstr "KBuildSycoca"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:92
-#, fuzzy, kde-format
-#| msgid "Rebuilds the system configuration cache."
+#, kde-format
 msgctxt "application description"
 msgid "Rebuilds the system configuration cache."
-msgstr "Възстановяване кеша на системата."
+msgstr "Възстановява кеша на конфигурацията на системата."
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:94
-#, fuzzy, kde-format
-#| msgid "(c) 1999-2002 KDE Developers"
+#, kde-format
 msgctxt "@info:credit"
 msgid "Copyright 1999-2014 KDE Developers"
-msgstr "(c) 1999-2002, екипът на KDE"
+msgstr "Авторско право 1999-2014 Разработчици на KDE"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:95
-#, fuzzy, kde-format
-#| msgid "David Faure"
+#, kde-format
 msgctxt "@info:credit"
 msgid "David Faure"
 msgstr "David Faure"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:95 kbuildsycoca/kbuildsycoca_main.cpp:96
-#, fuzzy, kde-format
-#| msgid "Author"
+#, kde-format
 msgctxt "@info:credit"
 msgid "Author"
 msgstr "Автор"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:96
-#, fuzzy, kde-format
-#| msgid "Waldo Bastian"
+#, kde-format
 msgctxt "@info:credit"
 msgid "Waldo Bastian"
 msgstr "Waldo Bastian"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:103
-#, fuzzy, kde-format
-#| msgid "Disable checking files (dangerous)"
+#, kde-format
 msgctxt "@info:shell command-line option"
 msgid ""
 "Do not signal applications to update (deprecated, no longer having any "
 "effect)"
-msgstr "Изключване на проверката (опасно)"
+msgstr ""
+"Без сигнализиране на приложенията за извършване на актуализация (оттеглено, "
+"вече няма такъв ефект)"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:105
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Disable incremental update, re-read everything"
 msgstr ""
+"Деактивиране на инкрементно актуализиране, повторно прочитане на всичко"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:107
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Check file timestamps (deprecated, no longer having any effect)"
-msgstr ""
+msgstr "Проверка на времевите щампи на файла (оттеглено, вече няма ефект)"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:109
-#, fuzzy, kde-format
-#| msgid "Disable checking files (dangerous)"
+#, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Disable checking files (deprecated, no longer having any effect)"
-msgstr "Изключване на проверката (опасно)"
+msgstr "Деактивиране на проверката на файлове (оттеглено, вече няма ефект)"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:110
-#, fuzzy, kde-format
-#| msgid "Perform menu generation test run only"
+#, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Perform menu generation test run only"
-msgstr "Само тест за генериране на меню"
+msgstr "Пробно генериране на меню"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:112
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Track menu id for debug purposes"
 msgstr ""
+"Проследяване на идентификатор на менюто за целите на отстраняване на грешки"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:114
 #, kde-format
 msgctxt "@info:shell command-line option"
 msgid "Switch QStandardPaths to test mode, for unit tests only"
-msgstr ""
+msgstr "Превключване QStandardPaths в тестов режим, само за единични тестове"
 
 #: kdeinit/ktoolinvocation.cpp:60
 #, kde-format
@@ -128,6 +124,8 @@ msgid ""
 "Error launching %1. Either KLauncher is not running anymore, or it failed to "
 "start the application."
 msgstr ""
+"Грешка при стартирането на %1. Или KLauncher вече не работи, или не успя да "
+"стартира приложението."
 
 #: kdeinit/ktoolinvocation.cpp:104
 #, kde-format
@@ -178,7 +176,7 @@ msgstr "Грешка при зареждане на браузъра"
 #: kdeinit/ktoolinvocation_x11.cpp:342
 #, kde-format
 msgid "Unable to determine the default terminal"
-msgstr ""
+msgstr "Не може да се определи терминалът по подразбиране"
 
 #: kdeinit/ktoolinvocation_x11.cpp:354
 #, kde-format
@@ -199,16 +197,15 @@ msgstr "Грешка при зареждане на терминалния кл�
 #: plugin/kdbusservicestarter.cpp:68
 #, kde-format
 msgid "No service implementing %1"
-msgstr ""
+msgstr "Няма услуга, внедряваща %1"
 
-#: services/kservice.cpp:1066
+#: services/kservice.cpp:1120
 #, kde-format
 msgid "The provided service is not valid"
 msgstr "Услугата е невалидна"
 
-#: services/kservice.cpp:1070
-#, fuzzy, kde-format
-#| msgid ""
-#| "The service '%1' provides no library or the Library key is missing in "
+#: services/kservice.cpp:1124
+#, kde-format
 msgid "The service '%1' provides no library or the Library key is missing"
-msgstr "Услугата \"%1\" няма библиотека или ключът за нея липсва в "
+msgstr ""
+"Услугата \"%1\" не предоставя библиотека или липсва ключът на библиотеката"

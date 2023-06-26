@@ -1,22 +1,9 @@
-# translation of kdelibs4.po to Chinese Simplified
-# Copyright (C) 2007 Free Software Foundation, Inc.
-#
-# Lie Ex <lilith.ex@gmail.com> 2007-2011.
-# Wang Jian <lark@linux.ustc.edu.cn>, 1998.
-# Sarah Smith <sarahs@redhat.com>, 2002.
-# Xiong Jiang <jxiong@offtopic.org>, 2002,2003,2004.
-# Funda Wang <fundawang@linux.net.cn>, 2002,2003,2004.
-# Liang Qi <cavendish.qi@gmail.com>, 2007.
-# Feng Chao <chaofeng111@gmail.com>, 2010, 2012, 2014.
-# Ni Hui <shuizhuyuanluo@126.com>, 2010, 2011, 2012.
-# Weng Xuetian <wengxt@gmail.com>, 2011, 2012, 2013, 2015.
-# Xuetian Weng <xweng@cs.stonybrook.edu>, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: kdeorg\n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2021-09-19 00:15+0000\n"
-"PO-Revision-Date: 2021-12-22 14:06\n"
+"POT-Creation-Date: 2022-12-22 00:43+0000\n"
+"PO-Revision-Date: 2023-01-12 10:30\n"
 "Last-Translator: \n"
 "Language-Team: Chinese Simplified\n"
 "Language: zh_CN\n"
@@ -58,7 +45,7 @@ msgstr "重建系统配置缓存。"
 #, kde-format
 msgctxt "@info:credit"
 msgid "Copyright 1999-2014 KDE Developers"
-msgstr "版权 1999-2014 KDE 开发团队"
+msgstr "Copyright 1999-2014 KDE Developers"
 
 #: kbuildsycoca/kbuildsycoca_main.cpp:95
 #, kde-format
@@ -207,12 +194,12 @@ msgstr "无法调用命令行终端"
 msgid "No service implementing %1"
 msgstr "没有实现 %1 的服务"
 
-#: services/kservice.cpp:1066
+#: services/kservice.cpp:1120
 #, kde-format
 msgid "The provided service is not valid"
 msgstr "提供的服务无效"
 
-#: services/kservice.cpp:1070
+#: services/kservice.cpp:1124
 #, kde-format
 msgid "The service '%1' provides no library or the Library key is missing"
 msgstr "服务“%1”没有提供程序库，或者该程序库项不存在"

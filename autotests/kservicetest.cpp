@@ -1,5 +1,6 @@
 /*
     SPDX-FileCopyrightText: 2006 David Faure <faure@kde.org>
+    SPDX-FileCopyrightText: 2022 Harald Sitter <sitter@kde.org>
 
     SPDX-License-Identifier: LGPL-2.0-only
 */
@@ -365,7 +366,7 @@ void KServiceTest::testProperty()
     QCOMPARE(kdedkcookiejar->property(QStringLiteral("X-KDE-Kded-autoload")).toBool(), false);
     QCOMPARE(kdedkcookiejar->property(QStringLiteral("X-KDE-Kded-load-on-demand")).toBool(), true);
     QVERIFY(!kdedkcookiejar->property(QStringLiteral("Name")).toString().isEmpty());
-    QVERIFY(!kdedkcookiejar->property(QStringLiteral("Name[fr]"), QVariant::String).isValid());
+    QVERIFY(!kdedkcookiejar->property(QStringLiteral("Name[fr]"), QMetaType::QString).isValid());
 
     // TODO: for this we must install a servicetype desktop file...
     // KService::Ptr kjavaappletviewer = KService::serviceByDesktopPath("kjavaappletviewer.desktop");
@@ -394,10 +395,7 @@ void KServiceTest::testAllServiceTypes()
     const KServiceType::List allServiceTypes = KServiceType::allServiceTypes();
 
     // A bit of checking on the allServiceTypes list itself
-    KServiceType::List::ConstIterator stit = allServiceTypes.begin();
-    const KServiceType::List::ConstIterator stend = allServiceTypes.end();
-    for (; stit != stend; ++stit) {
-        const KServiceType::Ptr servtype = (*stit);
+    for (const KServiceType::Ptr &servtype : allServiceTypes) {
         const QString name = servtype->name();
         QVERIFY(!name.isEmpty());
         QVERIFY(servtype->sycocaType() == KST_KServiceType);
@@ -413,8 +411,7 @@ void KServiceTest::testAllServices()
     QVERIFY(!lst.isEmpty());
     bool foundTestApp = false;
 
-    for (KService::List::ConstIterator it = lst.begin(); it != lst.end(); ++it) {
-        const KService::Ptr service = (*it);
+    for (const KService::Ptr &service : lst) {
         QVERIFY(service->isType(KST_KService));
 
         const QString name = service->name();
@@ -449,9 +446,8 @@ void KServiceTest::testAllServices()
 static bool offerListHasService(const KService::List &offers, const QString &entryPath)
 {
     bool found = false;
-    KService::List::const_iterator it = offers.begin();
-    for (; it != offers.end(); ++it) {
-        if ((*it)->entryPath() == entryPath) {
+    for (const auto &servicePtr : offers) {
+        if (servicePtr->entryPath() == entryPath) {
             if (found) { // should be there only once
                 qWarning("ERROR: %s was found twice in the list", qPrintable(entryPath));
                 return false; // make test fail
@@ -471,7 +467,9 @@ void KServiceTest::testDBUSStartupType()
     QVERIFY(testapp);
     QCOMPARE(testapp->menuId(), QStringLiteral("org.kde.faketestapp.desktop"));
     // qDebug() << testapp->entryPath();
+#if KSERVICE_BUILD_DEPRECATED_SINCE(5, 102)
     QCOMPARE(int(testapp->dbusStartupType()), int(KService::DBusUnique));
+#endif
 }
 
 void KServiceTest::testByStorageId()
@@ -734,7 +732,7 @@ void KServiceTest::testActionsAndDataStream()
 {
     KService::Ptr service = KService::serviceByStorageId(QStringLiteral("org.kde.faketestapp.desktop"));
     QVERIFY(service);
-    QVERIFY(!service->property(QStringLiteral("Name[fr]"), QVariant::String).isValid());
+    QVERIFY(!service->property(QStringLiteral("Name[fr]"), QMetaType::QString).isValid());
     const QList<KServiceAction> actions = service->actions();
     QCOMPARE(actions.count(), 2); // NewWindow, NewTab
     const KServiceAction newTabAction = actions.at(1);
@@ -874,6 +872,8 @@ void KServiceTest::testThreads()
 #if KSERVICE_BUILD_DEPRECATED_SINCE(5, 86)
 void KServiceTest::testOperatorKPluginName()
 {
+    QT_WARNING_PUSH
+    QT_WARNING_DISABLE_DEPRECATED
     KService fservice(QFINDTESTDATA("fakeplugin.desktop"));
     KPluginName fname(fservice);
     QVERIFY(fname.isValid());
@@ -904,13 +904,15 @@ void KServiceTest::testOperatorKPluginName()
     QVERIFY(!iname.errorString().isEmpty());
     KPluginLoader iplugin(iservice);
     QVERIFY(!iplugin.factory());
+    QT_WARNING_POP
 }
 #endif
 
 #if KSERVICE_BUILD_DEPRECATED_SINCE(5, 90)
 void KServiceTest::testKPluginInfoQuery()
 {
-    KPluginInfo info(KPluginMetaData(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String{"/kservices5/fakepart2.desktop"}));
+    KPluginInfo info(KPluginMetaData::fromDesktopFile(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
+                                                      + QLatin1String{"/kservices5/fakepart2.desktop"}));
 
     QCOMPARE(info.property(QStringLiteral("X-KDE-TestList")).toStringList().size(), 2);
 }
@@ -935,7 +937,7 @@ void KServiceTest::testEntryPathToName()
 void KServiceTest::testKPluginMetaData()
 {
     const QString fakePart = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String{"/kservices5/fakepart.desktop"};
-    KPluginMetaData md(fakePart);
+    KPluginMetaData md = KPluginMetaData::fromDesktopFile(fakePart);
     KService::Ptr service(new KService(fakePart));
     KPluginInfo info(service);
     auto info_md = info.toMetaData();
@@ -953,3 +955,13 @@ void KServiceTest::testTraderQueryMustRebuildSycoca()
     QVERIFY(offers.count() > 0);
 }
 #endif
+
+void KServiceTest::testAliasFor()
+{
+    if (!KSycoca::isAvailable()) {
+        QSKIP("ksycoca not available");
+    }
+    KService::Ptr testapp = KService::serviceByDesktopName(QStringLiteral("org.kde.faketestapp"));
+    QVERIFY(testapp);
+    QCOMPARE(testapp->aliasFor(), QStringLiteral("org.kde.okular"));
+}

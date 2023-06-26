@@ -2,6 +2,7 @@
     This file is part of the KDE project
     SPDX-FileCopyrightText: 1998, 1999 Torben Weis <weis@kde.org>
     SPDX-FileCopyrightText: 1999-2006 David Faure <faure@kde.org>
+    SPDX-FileCopyrightText: 2022 Harald Sitter <sitter@kde.org>
 
     SPDX-License-Identifier: LGPL-2.0-or-later
 */
@@ -10,12 +11,16 @@
 #define KSERVICE_H
 
 #include "kserviceaction.h"
-#include <KPluginFactory>
-#include <KPluginLoader>
 #include <QCoreApplication>
 #include <QStringList>
 #include <QVariant>
 #include <ksycocaentry.h>
+
+// Exclude includes that are not needed when deprecations are disabled
+#if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 94)
+#include <KPluginFactory>
+#include <KPluginLoader>
+#endif
 
 class KServiceType;
 class QDataStream;
@@ -173,6 +178,7 @@ public:
      */
     QString storageId() const;
 
+#if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 102)
     /**
      * Describes the D-Bus Startup type of the service.
      * @li None - This service has no D-Bus support
@@ -184,12 +190,18 @@ public:
      *             the PID of the process.
      */
     enum DBusStartupType { DBusNone = 0, DBusUnique, DBusMulti };
+#endif
 
+#if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 102)
     /**
      * Returns the DBUSStartupType supported by this service.
      * @return the DBUSStartupType supported by this service
+     *
+     * @deprecated since 5.102, no known users.
      */
+    KSERVICE_DEPRECATED_VERSION(5, 102, "No known users")
     DBusStartupType dbusStartupType() const;
+#endif
 
 #if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 63)
     /**
@@ -247,7 +259,7 @@ public:
     /**
      * Returns the list of MIME types that this service supports.
      * Note that this doesn't include inherited MIME types,
-     * only the MIME types types listed in the .desktop file.
+     * only the MIME types listed in the .desktop file.
      * @since 4.8.3
      */
     QStringList mimeTypes() const;
@@ -397,6 +409,7 @@ public:
      */
     QString docPath() const;
 
+#if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 102)
     /**
      * Returns the requested property.
      *
@@ -404,8 +417,24 @@ public:
      * @param t the assumed type of the property
      * @return the property, or invalid if not found
      * @see KServiceType
+     *
+     * @deprecated since 5.102, use property(QString, QMetaType::Type) instead.
      */
+    KSERVICE_DEPRECATED_VERSION(5, 102, "Use property(QString, QMetaType::Type) instead")
     QVariant property(const QString &_name, QVariant::Type t) const;
+#endif
+
+    /**
+     * Returns the requested property.
+     *
+     * @param _name the name of the property
+     * @param t the assumed type of the property
+     * @return the property, or invalid if not found
+     * @see KServiceType
+     *
+     * @since 5.102
+     */
+    QVariant property(const QString &_name, QMetaType::Type t) const;
 
     using KSycocaEntry::property;
 
@@ -538,8 +567,8 @@ public:
      */
     static QString newServicePath(bool showInMenu, const QString &suggestedName, QString *menuId = nullptr, const QStringList *reservedMenuIds = nullptr);
 
-#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
 #if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 86)
+#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
     /**
      * This template allows to load the library for the specified service and ask the
      * factory to create an instance of the given template type.
@@ -564,8 +593,8 @@ public:
 #endif
 #endif
 
-#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
 #if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 86)
+#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
     /**
      * This template allows to load the library for the specified service and ask the
      * factory to create an instance of the given template type.
@@ -587,8 +616,7 @@ public:
     T *createInstance(QWidget *parentWidget, QObject *parent, const QVariantList &args = QVariantList(), QString *error = nullptr) const
     {
         QT_WARNING_PUSH
-        QT_WARNING_DISABLE_CLANG("-Wdeprecated-declarations")
-        QT_WARNING_DISABLE_GCC("-Wdeprecated-declarations")
+        QT_WARNING_DISABLE_DEPRECATED
         KPluginLoader pluginLoader(*this);
         KPluginFactory *factory = pluginLoader.factory();
         if (factory) {
@@ -609,8 +637,8 @@ public:
 #endif
 #endif
 
-#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
 #if KSERVICE_ENABLE_DEPRECATED_SINCE(5, 86)
+#if KCOREADDONS_ENABLE_DEPRECATED_SINCE(5, 86)
     /**
      * Convert this KService to a KPluginName.
      *
@@ -625,6 +653,23 @@ public:
     operator KPluginName() const;
 #endif
 #endif
+
+    /**
+     * @brief A desktop file name that this service is an alias for.
+     *
+     * This is used when a NoDisplay service is used to enforce specific handling
+     * for an application. In that case the NoDisplay service is an AliasFor another
+     * service and be considered roughly equal to the AliasFor service (which should
+     * not be NoDisplay=true)
+     * For example okular supplies a desktop file for each supported format (e.g. PDF), all
+     * of which NoDisplay and merely there to selectively support specific file formats.
+     * A UI may choose to display the aliased entry org.kde.okular instead of the NoDisplay entries.
+     *
+     * @since 5.96
+     *
+     * @return QString desktopName of the aliased service (excluding .desktop suffix)
+     */
+    QString aliasFor() const;
 
 private:
     friend class KBuildServiceFactory;

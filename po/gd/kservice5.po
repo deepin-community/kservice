@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2021-09-19 00:15+0000\n"
+"POT-Creation-Date: 2022-12-22 00:43+0000\n"
 "PO-Revision-Date: 2015-11-04 15:15+0000\n"
 "Last-Translator: Michael Bauer <fios@akerbeltz.org>\n"
 "Language-Team: Fòram na Gàidhlig\n"
@@ -202,14 +202,18 @@ msgstr "Cha deach leinn cliant an tèirmineil a thòiseachadh"
 msgid "No service implementing %1"
 msgstr "Chan eil seirbheis sam bith a' toirt %1 gu buil"
 
-#: services/kservice.cpp:1066
+#: services/kservice.cpp:1120
 #, kde-format
 msgid "The provided service is not valid"
 msgstr "Chan eil an t-seirbheis a chaidh a shònrachadh dligheach"
 
-#: services/kservice.cpp:1070
+#: services/kservice.cpp:1124
 #, kde-format
 msgid "The service '%1' provides no library or the Library key is missing"
 msgstr ""
 "Chan eil an t-seirbheis \"%1\" a' solar leabharlann no tha iuchair an "
 "leabharlainn a dhìth"
+
+#~ msgctxt "@info:shell command-line option"
+#~ msgid "Create global database"
+#~ msgstr "Cruthaich stòr-dàta uile-choitcheann"

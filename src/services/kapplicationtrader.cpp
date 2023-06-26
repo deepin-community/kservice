@@ -17,6 +17,9 @@
 
 #include <QMimeDatabase>
 
+#include <KConfigGroup>
+#include <KSharedConfig>
+
 static KService::List mimeTypeSycocaServiceOffers(const QString &mimeType)
 {
     KService::List lst;
@@ -112,6 +115,31 @@ KService::Ptr KApplicationTrader::preferredService(const QString &mimeType)
     return KService::Ptr();
 }
 
+void KApplicationTrader::setPreferredService(const QString &mimeType, const KService::Ptr service)
+{
+    if (mimeType.isEmpty() || !(service && service->isValid())) {
+        return;
+    }
+    KSharedConfig::Ptr profile = KSharedConfig::openConfig(QStringLiteral("mimeapps.list"), KConfig::NoGlobals, QStandardPaths::GenericConfigLocation);
+
+    // Save the default application according to mime-apps-spec 1.0
+    KConfigGroup defaultApp(profile, "Default Applications");
+    defaultApp.writeXdgListEntry(mimeType, QStringList(service->storageId()));
+
+    KConfigGroup addedApps(profile, "Added Associations");
+    QStringList apps = addedApps.readXdgListEntry(mimeType);
+    apps.removeAll(service->storageId());
+    apps.prepend(service->storageId()); // make it the preferred app
+    addedApps.writeXdgListEntry(mimeType, apps);
+
+    profile->sync();
+
+    // Also make sure the "auto embed" setting for this MIME type is off
+    KSharedConfig::Ptr fileTypesConfig = KSharedConfig::openConfig(QStringLiteral("filetypesrc"), KConfig::NoGlobals);
+    fileTypesConfig->group("EmbedSettings").writeEntry(QStringLiteral("embed-") + mimeType, false);
+    fileTypesConfig->sync();
+}
+
 bool KApplicationTrader::isSubsequence(const QString &pattern, const QString &text, Qt::CaseSensitivity cs)
 {
     if (pattern.isEmpty()) {
@@ -119,12 +147,12 @@ bool KApplicationTrader::isSubsequence(const QString &pattern, const QString &te
     }
     const bool chk_case = cs == Qt::CaseSensitive;
 
-    QString::const_iterator i = text.constBegin();
-    QString::const_iterator j = pattern.constBegin();
-    for (; i != text.constEnd() && j != pattern.constEnd(); ++i) {
-        if ((chk_case && *i == *j) || (!chk_case && i->toLower() == j->toLower())) {
-            ++j;
+    auto textIt = text.cbegin();
+    auto patternIt = pattern.cbegin();
+    for (; textIt != text.cend() && patternIt != pattern.cend(); ++textIt) {
+        if ((chk_case && *textIt == *patternIt) || (!chk_case && textIt->toLower() == patternIt->toLower())) {
+            ++patternIt;
         }
     }
-    return j == pattern.constEnd();
+    return patternIt == pattern.cend();
 }

@@ -24,7 +24,7 @@ static void foldNode(QDomElement &docElem, QDomElement &e, QMap<QString, QDomEle
     if (s.isEmpty()) {
         s = e.text();
     }
-    QMap<QString, QDomElement>::iterator it = dupeList.find(s);
+    auto it = dupeList.find(s);
     if (it != dupeList.end()) {
         // qCDebug(SYCOCA) << e.tagName() << "and" << s << "requires combining!";
 
@@ -34,18 +34,18 @@ static void foldNode(QDomElement &docElem, QDomElement &e, QMap<QString, QDomEle
     dupeList.insert(s, e);
 }
 
-static void replaceNode(QDomElement &docElem, QDomNode &n, const QStringList &list, const QString &tag)
+static void replaceNode(QDomElement &docElem, QDomNode &node, const QStringList &list, const QString &tag)
 {
-    for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-        QDomElement e = docElem.ownerDocument().createElement(tag);
-        QDomText txt = docElem.ownerDocument().createTextNode(*it);
-        e.appendChild(txt);
-        docElem.insertAfter(e, n);
+    for (const QString &str : list) {
+        QDomElement element = docElem.ownerDocument().createElement(tag);
+        const QDomText txt = docElem.ownerDocument().createTextNode(str);
+        element.appendChild(txt);
+        docElem.insertAfter(element, node);
     }
 
-    QDomNode next = n.nextSibling();
-    docElem.removeChild(n);
-    n = next;
+    QDomNode next = node.nextSibling();
+    docElem.removeChild(node);
+    node = next;
     //   qCDebug(SYCOCA) << "Next tag = " << n.toElement().tagName();
 }
 
@@ -1280,7 +1280,7 @@ static QString parseAttribute(const QDomElement &e)
     return option;
 }
 
-static QStringList parseLayoutNode(const QDomElement &docElem)
+QStringList VFolderMenu::parseLayoutNode(const QDomElement &docElem) const
 {
     QStringList layout;
 
@@ -1324,7 +1324,8 @@ static QStringList parseLayoutNode(const QDomElement &docElem)
     if (!mergeTagExists) {
         layout.append(QStringLiteral(":M"));
         layout.append(QStringLiteral(":F"));
-        qCWarning(SYCOCA) << "The menu spec file contains a Layout or DefaultLayout tag without the mandatory Merge tag inside. Please fix your file.";
+        qCWarning(SYCOCA) << "The menu spec file (" << m_docInfo.path
+                          << ") contains a Layout or DefaultLayout tag without the mandatory Merge tag inside. Please fix it.";
     }
     return layout;
 }

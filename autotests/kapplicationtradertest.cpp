@@ -50,6 +50,7 @@ private Q_SLOTS:
     void testQueryByMimeType();
     void testThreads();
     void testTraderQueryMustRebuildSycoca();
+    void testSetPreferredService();
     void cleanupTestCase();
 
 private:
@@ -246,7 +247,7 @@ void KApplicationTraderTest::testTraderConstraints_data()
 
     // Test another property, parsed as a double
     FF testVersion = [](const KService::Ptr &serv) {
-        double d = serv->property(QStringLiteral("X-KDE-Version"), QVariant::Double).toDouble();
+        double d = serv->property(QStringLiteral("X-KDE-Version"), QMetaType::Double).toDouble();
         return d > 5.559 && d < 5.561;
     };
     QTest::newRow("float_parsing") << testVersion << ExpectedResult::FakeApplicationAndOthers;
@@ -342,6 +343,16 @@ void KApplicationTraderTest::testTraderQueryMustRebuildSycoca()
     createFakeApplication(QStringLiteral("fakeservice_querymustrebuild.desktop"), QStringLiteral("MustRebuild"));
     KService::List offers = KApplicationTrader::query(filter);
     QCOMPARE(offers.count(), 1);
+}
+
+void KApplicationTraderTest::testSetPreferredService()
+{
+    const KService::Ptr oldPref = KApplicationTrader::preferredService(QLatin1String("text/plain"));
+    const KService::Ptr newPref = KService::serviceByDesktopPath(m_fakeApplication);
+    KApplicationTrader::setPreferredService(QLatin1String("text/plain"), newPref);
+    QCOMPARE(KApplicationTrader::preferredService(QLatin1String("text/plain"))->entryPath(), m_fakeApplication);
+    KApplicationTrader::setPreferredService(QLatin1String("text/plain"), oldPref);
+    QCOMPARE(KApplicationTrader::preferredService(QLatin1String("text/plain"))->storageId(), oldPref->storageId());
 }
 
 #include "kapplicationtradertest.moc"
